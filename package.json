@@ -10,6 +10,8 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "horoscope": "^2.0.1",
+    "moment": "^2.30.1"
   }
 }

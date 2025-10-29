@@ -4,7 +4,11 @@
 
 //Boiler plate code to start server:
 //Importing all of our node modules
+import fs from "fs/promises";
+import moment from "moment";
+import { getSign, getZodiac } from "horoscope";
 import express from "express"; // the framework that lets us build webservers
+import { get } from "https";
 
 //Declare a variable named app and call the express() function to create a new instance of express so we can use all of the methods, fucntions, properties of express
 // which will be saved in app
@@ -70,6 +74,16 @@ app.get("/get-user/:userName", (req, res) => {
   res.send(`Hello, ${userName}!`); // this method lets us send back a string as response
 });
 
+//sixth end-point
+app.get("/order-tacos/:protein/:numTacos", (req, res) => {
+  const protein = req.params.protein;
+  const numTacos = req.params.numTacos;
+  //the res.send() method sends back a String as a response
+  res.send(
+    `Thanks for your order. You ordered ${numTacos} ${protein} 🌮 tacos.`
+  ); // this method lets us send back a string as response
+});
+
 //POST request
 // app.post()
 
@@ -133,22 +147,123 @@ app.get("/say-hello/:name/:language", (req, res) => {
 
 // 1. 🏆 Add a /calculate-dog-years/:dogName/:humanYears endpoint that calculates a dog's age in dog years. Refer to your dogAgeCalculator.js file.
 
+app.get("/calculate-dog-years/:dogName/:humanYears", (req, res) => {
+  let dogName = req.params.dogName;
+  let age = Number(req.params.humanYears);
+  let dogAge = 0;
+  if (age == 1) {
+    dogAge = 15;
+  } else if (age == 2) {
+    dogAge = 15 + 9;
+  } else if (age > 2) {
+    let num = age - 2;
+    let multipliedBy5 = num * 5;
+    dogAge = 15 + 9 + multipliedBy5;
+  }
+  let message = `Your astro sign is ${age} in human years but  ${dogAge} in dog years.`;
+  res.send(message);
+});
 // 2. 🏆 Add a /calculate-tip/:bill/:tipPercentage/:numGuests endpoint that calculates the amount each guests owes. Refer to your tipCalculator.js file.
 
+app.get("/calculate-tip/:bill/:tipPercentage/:numGuests", (req, res) => {
+  let bill = Number(req.params.bill);
+  let tipPercent = Number(req.params.tipPercentage);
+  let numGuests = Number(req.params.numGuests);
+
+  //we want to calculate 3 values : tip amount, total bill, and the total for each guest
+
+  //calculating the tip amount
+  let tipAmount = bill * tipPercent;
+  console.log("tip amount : $", tipAmount);
+
+  //total bill
+  let totalBill = bill + tipAmount;
+  console.log("total bill : $", totalBill);
+
+  //total for each guest
+  let totalForEachGuest = totalBill / numGuests;
+  console.log("total for each guest : $", totalForEachGuest);
+
+  let message = `Your total bill is  $${totalBill} . 
+  Tip Ammount is $${tipAmount} & total for each guest is ${totalForEachGuest} .`;
+  res.send(message);
+});
 // --------------------------------
 // LEVEL 4 CHALLENGES — USING THE FILE SYSTEM MODULE
 // --------------------------------
 
 // 1. 🏆 Add a /get-birthstone/:month endpoint that tells the user the birthstone for the inputted month using the fs module. Use the birthstones-data.json file in this folder.
+app.get("/get-birthstone/:month", async (req, res) => {
+  let month = req.params.month;
+  let birthStone = await getBirthstone(month);
+  console.log("app", birthStone);
+  res.send(`Your birthstone is ${birthStone}`);
+});
+
+async function getBirthstone(month) {
+  const data = await fs.readFile("./birthstones-data.json", "utf8"); //one dot(.) means current folder, two dots (..) means
+  //data is still in json format.
+  //convert it to JavaScript : We need to parse the JSON object into JavaScript
+  //Declare a variable named parsedData and store the parsed data in it converted using the JSON.parse method
+  const parsedData = JSON.parse(data);
+  let birthStone = parsedData[month];
+  console.log(birthStone);
+  return birthStone;
+}
 
 // 2. 🏆 Add a /get-all-pizza-orders endpoint that responds with the array of pizza orders. Use the pizza-orders-data.json file in this folder.
 
+app.get("/get-all-pizza-orders", async (req, res) => {
+  const pizzaOrders = await getAllPizzaOrders();
+  console.log("app", pizzaOrders);
+  res.send(`All pizza orders : ${pizzaOrders}`);
+});
+
+async function getAllPizzaOrders() {
+  const data = await fs.readFile("./pizza-orders-data.json", "utf8");
+  const parsedData = JSON.parse(data);
+  return parsedData;
+}
+
 // 3. 🏆 Add a /get-one-pizza-order/:index endpoint that responds with the specified pizza order.
 
+app.get("/get-one-pizza-order/:index", async (req, res) => {
+  let index = req.params.index;
+  const pizzaOrder = await getOneOrder(index);
+  console.log("app", pizzaOrder);
+  res.send(`Pizza order ${index} : ${pizzaOrder}`);
+});
+
+async function getOneOrder(index) {
+  const data = await fs.readFile("./pizza-orders-data.json", "utf8");
+  const parsedData = JSON.parse(data);
+  return parsedData[index];
+}
 // --------------------------------
 // 🚀 LEVEL 5 CHALLENGES — USING THIRD-PARTY MODULES
 // --------------------------------
 
 // 1. 🏆 Add a /is-leap-year/:year endpoint that responds with whether the specified year is a leap year. Use the moment third-party node module and refer to your leap-year.js file.
+app.get("/is-leap-year/:year", (req, res) => {
+  let year = Number(req.params.year);
+  console.log(typeof year, year);
+  // save result in a vraiable named result and use moment to find if year is leap
+  let result = moment([year]).isLeapYear();
+  let message = result
+    ? `${year} is a leap year`
+    : `${year} is not a leap year`;
+  // res.send() lets us send back a String as response
+  res.send(message);
+});
 
 // 2. 🏆 Add a /get-signs/:month/:day/:year endpoint that responds with the user's astrological and zodiac signs based on their inputted birthday. Use the horoscope third-party node module and refer to your sign-finder.js file.
+
+app.get("/get-signs/:month/:day/:year", (req, res) => {
+  let month = Number(req.params.month);
+  let day = Number(req.params.day);
+  let year = Number(req.params.year);
+  let zodiac = getZodiac(year);
+  let sign = getSign({ month: month, day: day });
+  let message = `Your astro sign is ${sign} and your zodiac sign is ${zodiac}.`;
+  res.send(message);
+});
