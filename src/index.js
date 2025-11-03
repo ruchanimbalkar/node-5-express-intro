@@ -192,7 +192,8 @@ app.get("/calculate-tip/:bill/:tipPercentage/:numGuests", (req, res) => {
 // LEVEL 4 CHALLENGES — USING THE FILE SYSTEM MODULE
 // --------------------------------
 
-// 1. 🏆 Add a /get-birthstone/:month endpoint that tells the user the birthstone for the inputted month using the fs module. Use the birthstones-data.json file in this folder.
+// 1. 🏆 Add a /get-birthstone/:month endpoint that tells the user the birthstone for the inputted month using the fs module. 
+// Use the birthstones-data.json file in this folder.
 app.get("/get-birthstone/:month", async (req, res) => {
   let month = req.params.month;
   let birthStone = await getBirthstone(month);
@@ -200,18 +201,28 @@ app.get("/get-birthstone/:month", async (req, res) => {
   res.send(`Your birthstone is ${birthStone}`);
 });
 
-async function getBirthstone(month) {
-  const data = await fs.readFile("./birthstones-data.json", "utf8"); //one dot(.) means current folder, two dots (..) means
-  //data is still in json format.
-  //convert it to JavaScript : We need to parse the JSON object into JavaScript
+
+
+const getBirthstone = async(month) =>{
+  const data = await fs.readFile("./birthstones-data.json", "utf-8");
   //Declare a variable named parsedData and store the parsed data in it converted using the JSON.parse method
   const parsedData = JSON.parse(data);
   let birthStone = parsedData[month];
-  console.log(birthStone);
   return birthStone;
 }
 
-// 2. 🏆 Add a /get-all-pizza-orders endpoint that responds with the array of pizza orders. Use the pizza-orders-data.json file in this folder.
+// 2. 🏆 Add a /get-all-pizza-orders endpoint that responds with the array of pizza orders. 
+// Use the pizza-orders-data.json file in this folder.
+
+
+const readPizzaFile = async() =>{
+  const data = await fs.readFile("./pizza-orders-data.json", "utf-8");
+  console.log("data : ", data);
+  const parsedData = JSON.parse(data);
+  console.log("parsed data : ", data);
+  return parsedData;
+
+}
 
 app.get("/get-all-pizza-orders", async (req, res) => {
   const pizzaOrders = await getAllPizzaOrders();
@@ -219,10 +230,9 @@ app.get("/get-all-pizza-orders", async (req, res) => {
   res.send(`All pizza orders : ${pizzaOrders}`);
 });
 
-async function getAllPizzaOrders() {
-  const data = await fs.readFile("./pizza-orders-data.json", "utf8");
-  const parsedData = JSON.parse(data);
-  return parsedData;
+const getAllPizzaOrders = async () =>{
+  const allOrders = await readPizzaFile();
+  return allOrders;
 }
 
 // 3. 🏆 Add a /get-one-pizza-order/:index endpoint that responds with the specified pizza order.
@@ -234,11 +244,13 @@ app.get("/get-one-pizza-order/:index", async (req, res) => {
   res.send(`Pizza order ${index} : ${pizzaOrder}`);
 });
 
-async function getOneOrder(index) {
-  const data = await fs.readFile("./pizza-orders-data.json", "utf8");
-  const parsedData = JSON.parse(data);
-  return parsedData[index];
+
+const getOneOrder = async(index) =>{
+  const allOrders = await readPizzaFile();
+  let pizzaOrder = allOrders[index];
+  return pizzaOrder;
 }
+
 // --------------------------------
 // 🚀 LEVEL 5 CHALLENGES — USING THIRD-PARTY MODULES
 // --------------------------------
