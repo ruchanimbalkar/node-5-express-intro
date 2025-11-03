@@ -185,7 +185,7 @@ app.get("/calculate-tip/:bill/:tipPercentage/:numGuests", (req, res) => {
   console.log("total for each guest : $", totalForEachGuest);
 
   let message = `Your total bill is  $${totalBill} . 
-  Tip Ammount is $${tipAmount} & total for each guest is ${totalForEachGuest} .`;
+  Tip Ammount is $${tipAmount} & total for each guest is $${totalForEachGuest} .`;
   res.send(message);
 });
 // --------------------------------
@@ -202,7 +202,7 @@ app.get("/get-birthstone/:month", async (req, res) => {
 });
 
 
-
+//Helper Function
 const getBirthstone = async(month) =>{
   const data = await fs.readFile("./birthstones-data.json", "utf-8");
   //Declare a variable named parsedData and store the parsed data in it converted using the JSON.parse method
@@ -214,7 +214,7 @@ const getBirthstone = async(month) =>{
 // 2. 🏆 Add a /get-all-pizza-orders endpoint that responds with the array of pizza orders. 
 // Use the pizza-orders-data.json file in this folder.
 
-
+//Helper Function
 const readPizzaFile = async() =>{
   const data = await fs.readFile("./pizza-orders-data.json", "utf-8");
   console.log("data : ", data);
@@ -230,6 +230,7 @@ app.get("/get-all-pizza-orders", async (req, res) => {
   res.send(`All pizza orders : ${pizzaOrders}`);
 });
 
+//Helper Function
 const getAllPizzaOrders = async () =>{
   const allOrders = await readPizzaFile();
   return allOrders;
@@ -244,7 +245,7 @@ app.get("/get-one-pizza-order/:index", async (req, res) => {
   res.send(`Pizza order ${index} : ${pizzaOrder}`);
 });
 
-
+//Helper Function
 const getOneOrder = async(index) =>{
   const allOrders = await readPizzaFile();
   let pizzaOrder = allOrders[index];
@@ -258,24 +259,38 @@ const getOneOrder = async(index) =>{
 // 1. 🏆 Add a /is-leap-year/:year endpoint that responds with whether the specified year is a leap year. Use the moment third-party node module and refer to your leap-year.js file.
 app.get("/is-leap-year/:year", (req, res) => {
   let year = Number(req.params.year);
-  console.log(typeof year, year);
-  // save result in a vraiable named result and use moment to find if year is leap
-  let result = moment([year]).isLeapYear();
-  let message = result
-    ? `${year} is a leap year`
-    : `${year} is not a leap year`;
+  //console.log(typeof year, year);
+  const message = findLeapYear(year);
   // res.send() lets us send back a String as response
   res.send(message);
 });
 
+
+//Helper Function
+const findLeapYear = (year) => {
+    // save result in a vraiable named result and use moment to find if year is leap
+  let result = moment([year]).isLeapYear();
+  let message = result
+    ? `${year} is a leap year`
+    : `${year} is not a leap year`;
+  return message;
+
+};
 // 2. 🏆 Add a /get-signs/:month/:day/:year endpoint that responds with the user's astrological and zodiac signs based on their inputted birthday. Use the horoscope third-party node module and refer to your sign-finder.js file.
 
 app.get("/get-signs/:month/:day/:year", (req, res) => {
   let month = Number(req.params.month);
   let day = Number(req.params.day);
   let year = Number(req.params.year);
+  let message = findZodiacAndAstro(month,day,year);
+  res.send(message);
+});
+
+//Helper Function
+const findZodiacAndAstro = (month,day,year) => {
   let zodiac = getZodiac(year);
   let sign = getSign({ month: month, day: day });
   let message = `Your astro sign is ${sign} and your zodiac sign is ${zodiac}.`;
-  res.send(message);
-});
+  return message;
+
+}
