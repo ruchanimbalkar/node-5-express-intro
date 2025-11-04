@@ -192,7 +192,7 @@ app.get("/calculate-tip/:bill/:tipPercentage/:numGuests", (req, res) => {
 // LEVEL 4 CHALLENGES — USING THE FILE SYSTEM MODULE
 // --------------------------------
 
-// 1. 🏆 Add a /get-birthstone/:month endpoint that tells the user the birthstone for the inputted month using the fs module. 
+// 1. 🏆 Add a /get-birthstone/:month endpoint that tells the user the birthstone for the inputted month using the fs module.
 // Use the birthstones-data.json file in this folder.
 app.get("/get-birthstone/:month", async (req, res) => {
   let month = req.params.month;
@@ -201,28 +201,26 @@ app.get("/get-birthstone/:month", async (req, res) => {
   res.send(`Your birthstone is ${birthStone}`);
 });
 
-
 //Helper Function
-const getBirthstone = async(month) =>{
+const getBirthstone = async (month) => {
   const data = await fs.readFile("./birthstones-data.json", "utf-8");
   //Declare a variable named parsedData and store the parsed data in it converted using the JSON.parse method
   const parsedData = JSON.parse(data);
   let birthStone = parsedData[month];
   return birthStone;
-}
+};
 
-// 2. 🏆 Add a /get-all-pizza-orders endpoint that responds with the array of pizza orders. 
+// 2. 🏆 Add a /get-all-pizza-orders endpoint that responds with the array of pizza orders.
 // Use the pizza-orders-data.json file in this folder.
 
 //Helper Function
-const readPizzaFile = async() =>{
+const readPizzaFile = async () => {
   const data = await fs.readFile("./pizza-orders-data.json", "utf-8");
   console.log("data : ", data);
   const parsedData = JSON.parse(data);
   console.log("parsed data : ", data);
   return parsedData;
-
-}
+};
 
 app.get("/get-all-pizza-orders", async (req, res) => {
   const pizzaOrders = await getAllPizzaOrders();
@@ -231,10 +229,10 @@ app.get("/get-all-pizza-orders", async (req, res) => {
 });
 
 //Helper Function
-const getAllPizzaOrders = async () =>{
+const getAllPizzaOrders = async () => {
   const allOrders = await readPizzaFile();
   return allOrders;
-}
+};
 
 // 3. 🏆 Add a /get-one-pizza-order/:index endpoint that responds with the specified pizza order.
 
@@ -246,12 +244,72 @@ app.get("/get-one-pizza-order/:index", async (req, res) => {
 });
 
 //Helper Function
-const getOneOrder = async(index) =>{
+const getOneOrder = async (index) => {
   const allOrders = await readPizzaFile();
   let pizzaOrder = allOrders[index];
   return pizzaOrder;
-}
+};
 
+// Nov. 04/2025 POST PRACTICE
+
+//Helper Function
+const addOneOrder = async (orderDetail) => {
+  let allOrders = await readPizzaFile();
+  console.log(typeof allOrders);
+  allOrders.push(orderDetail);
+  let stringifiedOrders = JSON.stringify(allOrders);
+
+  //write the new data to the file  //Reference : https://www.geeksforgeeks.org/node-js/node-js-fs-writefile-method/
+  fs.writeFile(
+    "./pizza-orders-data.json",
+    stringifiedOrders,
+    "utf-8",
+    (err) => {
+      if (err) {
+        console.error("Error writing file:", err);
+        return;
+      }
+      console.log("File written successfully!");
+    }
+  );
+};
+
+//add one order
+app.post("/add-one-order/:orderDetail", async (req, res) => {
+  let orderDetail = req.params.orderDetail;
+  await addOneOrder(orderDetail);
+  res.send(`${orderDetail} added successfully`);
+});
+
+//update one order
+const updateOneOrder = async (index, newOrder) => {
+  //get all orders
+  let allOrders = await readPizzaFile();
+  //add new order at index
+  allOrders[index] = newOrder;
+  let stringifiedOrders = JSON.stringify(allOrders);
+
+  //write the new data to the file  //Reference : https://www.geeksforgeeks.org/node-js/node-js-fs-writefile-method/
+  fs.writeFile(
+    "./pizza-orders-data.json",
+    stringifiedOrders,
+    "utf-8",
+    (err) => {
+      if (err) {
+        console.error("Error writing file:", err);
+        return;
+      }
+      console.log("File written successfully!");
+    }
+  );
+};
+
+app.post("/update-one-order/:index/:newOrder", async (req, res) => {
+  let index = req.params.index;
+  let newOrder = req.params.newOrder;
+  await updateOneOrder(index, newOrder);
+  res.send(`Order updated successfully`);
+});
 // --------------------------------
 // 🚀 LEVEL 5 CHALLENGES — USING THIRD-PARTY MODULES
 // --------------------------------
@@ -265,16 +323,14 @@ app.get("/is-leap-year/:year", (req, res) => {
   res.send(message);
 });
 
-
 //Helper Function
 const findLeapYear = (year) => {
-    // save result in a vraiable named result and use moment to find if year is leap
+  // save result in a vraiable named result and use moment to find if year is leap
   let result = moment([year]).isLeapYear();
   let message = result
     ? `${year} is a leap year`
     : `${year} is not a leap year`;
   return message;
-
 };
 // 2. 🏆 Add a /get-signs/:month/:day/:year endpoint that responds with the user's astrological and zodiac signs based on their inputted birthday. Use the horoscope third-party node module and refer to your sign-finder.js file.
 
@@ -282,15 +338,14 @@ app.get("/get-signs/:month/:day/:year", (req, res) => {
   let month = Number(req.params.month);
   let day = Number(req.params.day);
   let year = Number(req.params.year);
-  let message = findZodiacAndAstro(month,day,year);
+  let message = findZodiacAndAstro(month, day, year);
   res.send(message);
 });
 
 //Helper Function
-const findZodiacAndAstro = (month,day,year) => {
+const findZodiacAndAstro = (month, day, year) => {
   let zodiac = getZodiac(year);
   let sign = getSign({ month: month, day: day });
   let message = `Your astro sign is ${sign} and your zodiac sign is ${zodiac}.`;
   return message;
-
-}
+};
